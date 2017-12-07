@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// TODO: get download integrated into this file.
+
 type proxy struct {
 	controllerAddr string
 }
