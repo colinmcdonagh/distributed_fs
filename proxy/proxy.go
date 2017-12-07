@@ -16,19 +16,20 @@ func (p *proxy) fileAddr(file string) string {
 	return fmt.Sprintf("%s/%s", p.controllerAddr, file)
 }
 
-func (p *proxy) download(file string) *os.File {
-	resp, err := http.Get(fmt.Sprintf(p.fileAddr(file)))
-	if err != nil {
-		// handle error
+func (p *proxy) download(path string) (string, error) {
+	// check index
+	if serverInt, exists := filePath_serverInt[path]; exists {
+		fileResp, err := http.Get(fmt.Sprintf("%s%s",
+			fileServerAddrs[serverInt],
+			path))
+		if err != nil {
+			return "", err
+		}
+		defer fileResp.Body.Close()
+		file, _ := ioutil.ReadAll(fileResp.Body)
+		return string(file), nil
 	}
-	defer resp.Body.Close()
-	fileBytes, _ := ioutil.ReadAll(resp.Body)
-	filePtr, err := os.Create(file)
-	if err != nil {
-		// handle error
-	}
-	filePtr.Write(fileBytes)
-	return filePtr
+	return "", fmt.Errorf("file %s doesn`t exist\n", path)
 }
 
 func (p *proxy) upload(localfile, remotefile string) {

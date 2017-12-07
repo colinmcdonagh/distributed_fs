@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"html"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -58,20 +57,4 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 		response = "specified params != local_file\n"
 	}
 	fmt.Fprintln(w, html.EscapeString(response))
-}
-
-func download(path string) (string, error) {
-	// check index
-	if serverInt, exists := filePath_serverInt[path]; exists {
-		fileResp, err := http.Get(fmt.Sprintf("%s%s",
-			fileServerAddrs[serverInt],
-			path))
-		if err != nil {
-			return "", err
-		}
-		defer fileResp.Body.Close()
-		file, _ := ioutil.ReadAll(fileResp.Body)
-		return string(file), nil
-	}
-	return "", fmt.Errorf("file %s doesn`t exist\n", path)
 }
