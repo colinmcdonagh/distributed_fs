@@ -7,8 +7,8 @@ import (
 	"html"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -24,7 +24,7 @@ import (
  files uploaded won't be empty files, and therefore downloaded files
  won't be empty files.
 
- */
+*/
 
 func main() {
 	portPtr := flag.String("port", "", "port to run file server on")
@@ -40,7 +40,7 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		// 0. proxy looking to download file.
-		
+
 		fileContents, err := getLocalFile(filePath)
 		if err != nil {
 			// 0.1 but there was an error trying to access such a file.
@@ -57,7 +57,7 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		// 1. proxy looking to upload a file.
 
-		// first need to read the file that should be sent over http.
+		// first need to read the file being sent over http.
 		fileContents, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			fmt.Printf("error encountered reading body of posted file %s: %s",
@@ -67,16 +67,18 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 
 		// create directory.
 		dir := filepath.Dir(filePath)
-		_ = os.Mkdir(dir, os.ModePerm) 
-		// ignore error in the case that the directory already exists.
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("dir %s could not be created on the server: %s",
+				dir, err), 990)
+			return
+		}
 
 		err = write(filePath, string(fileContents))
 		if err != nil {
 			// 1.1.1 can't create the local file and write to it.
-			fmt.Printf("error encountered when trying to create file %s: %s\n",
-				r.URL.Path, err)
-			http.Error(w, fmt.Sprintf("file %s could not be created on the server",
-				filePath), 991)
+			http.Error(w, fmt.Sprintf("file %s could not be created on the server: %s",
+				filePath, err), 991)
 			return
 		}
 		response = "1"
