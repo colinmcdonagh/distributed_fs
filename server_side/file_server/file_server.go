@@ -45,7 +45,7 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			// 0.1 but there was an error trying to access such a file.
 			// presume that the error is because the file doesn't exist.
-			fmt.Printf("error encountered when trying to access local file %s: %s\n",
+			fmt.Printf("error encountered when trying to access local file %s: %s",
 				filePath, err)
 			http.Error(w, fmt.Sprintf("file %s doesn't exist to be downloaded",
 				filePath), 007)
@@ -88,7 +88,7 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 		response = fmt.Sprintf("cannot handle %s type requests\n", r.Method)
 	}
 
-	fmt.Fprintln(w, html.EscapeString(response))
+	fmt.Fprintf(w, html.EscapeString(response))
 }
 
 func getLocalFile(path string) (string, error) {
@@ -102,7 +102,7 @@ func getLocalFile(path string) (string, error) {
 	fileContents := make([]byte, 1000000)
 	numBytesRead, err := lF.Read(fileContents)
 	if err != nil {
-		return "", fmt.Errorf("encountered error when trying to read file %s: %s\n",
+		return "", fmt.Errorf("encountered error when trying to read file %s: %s",
 			path, err)
 	}
 
@@ -112,12 +112,12 @@ func getLocalFile(path string) (string, error) {
 func write(path, contents string) error {
 	lF, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("encountered error when trying to create file: %s\n", err)
+		return fmt.Errorf("encountered error when trying to create file: %s", err)
 	}
 
 	_, err = lF.Write([]byte(contents))
 	if err != nil {
-		return fmt.Errorf("encountered errror when trying to write to a file: %s\n", err)
+		return fmt.Errorf("encountered errror when trying to write to a file: %s", err)
 	}
 
 	return nil

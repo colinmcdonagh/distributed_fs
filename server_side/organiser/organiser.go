@@ -37,10 +37,10 @@ import (
 */
 
 var (
-	fileServerAddrs  []string
+	fileServerAddrs       []string
 	currUploadServerIndex int
 
-	filePath_serverAddr map[string]string
+	filePath_serverAddr    map[string]string
 	filePath_localFileName map[string]string
 )
 
@@ -82,7 +82,7 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 		// 0. it's requesting what server to download from.
 		if serverAddr, ok := filePath_serverAddr[filePath]; ok {
 			// 0.1 file being downloaded exists.
-			response = fmt.Sprintf("%s,%s", serverAddr, 
+			response = fmt.Sprintf("%s,%s", serverAddr,
 				filePath_localFileName[filePath])
 		} else {
 			// 0.2 file being downloaded doesn't exist.
@@ -99,18 +99,17 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 			lF = lFA[0]
 		} // local file which official file will be mapped to.
 
-
 		// first need to check if the file exists on a server already.
 		if serverAddr, ok := filePath_serverAddr[filePath]; ok {
 			// 1.1 file to be upload already exists.
-			response = fmt.Sprintf("%s,%s", 
-				serverAddr, 
+			response = fmt.Sprintf("%s,%s",
+				serverAddr,
 				filePath_localFileName[filePath])
 		} else {
 			// 1.2 file is being created for the first time.
 			currUploadServerIndex = (currUploadServerIndex + 1) %
-			 	len(fileServerAddrs)
-			response = fmt.Sprintf("%s,%s", 
+				len(fileServerAddrs)
+			response = fmt.Sprintf("%s,%s",
 				fileServerAddrs[currUploadServerIndex], lF)
 			filePath_serverAddr[filePath] = fileServerAddrs[currUploadServerIndex]
 			filePath_localFileName[filePath] = lF
@@ -120,5 +119,5 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "url parameters specified but no `upload` param", 72)
 	}
 
-	fmt.Fprintln(w, html.EscapeString(response))
+	fmt.Fprintf(w, html.EscapeString(response))
 }

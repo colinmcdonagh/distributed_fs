@@ -20,7 +20,10 @@ import (
  the organiser (directory service) address is specified as an address, and not
  an http request, i.e. as www.example.com and not http://www.example.com
 
- */
+ can determine file server responded with an error if there's no ',' comma
+ in the response, since it's used in order to separate returned values.
+
+*/
 
 type Proxy struct {
 	organiserAddr string
@@ -46,14 +49,21 @@ func (p *Proxy) Download(path string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	dLServerAddrAndLf, err := ioutil.ReadAll(resp.Body)
+	serverMsgBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("error encountered reading response from organiser: %s", err)
 	}
+	serverMsg := string(serverMsgBytes)
 
-	splitMsg := strings.Split(string(dLServerAddrAndLf), ",")
-	dLServerAddr := splitMsg[0]
-	lF := splitMsg[1] 
+	// could use regex matching of msgs here instead, but the basic
+	// determination is if there's a comma in the returned msg.
+	if !strings.Contains(serverMsg, ",") {
+		return "", fmt.Errorf("file server returned error msg: %s", serverMsg)
+	}
+
+	dLServerAddrAndLf := strings.Split(serverMsg, ",")
+	dLServerAddr := dLServerAddrAndLf[0]
+	lF := dLServerAddrAndLf[1]
 	// local filename
 
 	// make request to file server itself.
@@ -66,7 +76,7 @@ func (p *Proxy) Download(path string) (string, error) {
 
 	fileContents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("error encountered reading response from " +
+		return "", fmt.Errorf("error encountered reading response from "+
 			"file server %s: %s", dLServerAddr, err)
 	}
 
@@ -80,10 +90,10 @@ func (p *Proxy) Upload(localFilePath, officialFilePath, serverLocalFileName stri
 		requestSuffix = fmt.Sprintf("&local_filepath=%s", serverLocalFileName)
 	}
 
-	resp, err := http.Get(fmt.Sprintf("http://%s/%s?upload%s", 
+	resp, err := http.Get(fmt.Sprintf("http://%s/%s?upload%s",
 		p.organiserAddr, officialFilePath, requestSuffix))
 	if err != nil {
-		return fmt.Errorf("error encountered retrieving upload server addr:%s",
+		return fmt.Errorf("error encountered retrieving upload server addr: %s",
 			err)
 	}
 	defer resp.Body.Close()
@@ -97,13 +107,22 @@ func (p *Proxy) Upload(localFilePath, officialFilePath, serverLocalFileName stri
 
 	// make request to the upload server itself
 	var r io.Reader
-	r, _ = os.Open(localFilePath)
+	r, err = os.Open(localFilePath)
+	if err != nil {
+		return fmt.Errorf("error opening local file: %s", err)
+	}
 
-	resp, err = http.Post(fmt.Sprintf(`http://%s/%s?upload&local_filepath=%s`,
-	 	p.organiserAddr, dLServerAddr, lF), "text/plain", r)
+	resp, err = http.Post(fmt.Sprintf("http://%s/%s",
+		dLServerAddr, lF), "text/plain", r)
+	if err != nil {
+		return fmt.Errorf("error encountered trying to upload: %s", err)
+	}
 
-	uploadResp, _ := ioutil.ReadAll(resp.Body)
-	fmt.Printf("response from upload server was: %s", uploadResp)
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error encountered trying to read server response "+
+			"when uploading: %s", err)
+	}
 
 	return nil
 }
