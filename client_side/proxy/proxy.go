@@ -27,16 +27,22 @@ import (
 
 type Proxy struct {
 	organiserAddr string
+	lockAddr      string
 }
 
-func New(orgAddr string) Proxy {
+func New(orgAddr, lockServerAddr string) Proxy {
 	return Proxy{
 		organiserAddr: orgAddr,
+		lockAddr:      lockServerAddr,
 	}
 }
 
 func (p *Proxy) OrganiserAddr() string {
 	return p.organiserAddr
+}
+
+func (p *Proxy) LockAddr() string {
+	return p.lockAddr
 }
 
 func (p *Proxy) Download(path string) (string, error) {
@@ -83,15 +89,25 @@ func (p *Proxy) Download(path string) (string, error) {
 	return string(fileContents), nil
 }
 
-func (p *Proxy) Upload(localFilePath, officialFilePath, serverLocalFileName string) error {
+func (p *Proxy) Lock(globalFile string) error {
 
-	requestSuffix := ""
-	if serverLocalFileName != "" {
-		requestSuffix = fmt.Sprintf("&local_filepath=%s", serverLocalFileName)
+	resp, err := http.Get(fmt.Sprintf(`http://%s/%s`, p.lockAddr, globalFile))
+	if err != nil {
+		return err
 	}
+	defer resp.Body.Close()
 
-	resp, err := http.Get(fmt.Sprintf("http://%s/%s?upload%s",
-		p.organiserAddr, officialFilePath, requestSuffix))
+	success, _ := ioutil.ReadAll(resp.Body)
+	if string(success) == "0" {
+		return fmt.Errorf("lock already taken.")
+	}
+	return nil
+}
+
+func (p *Proxy) Upload(localFilePath, officialFilePath string) error {
+
+	resp, err := http.Get(fmt.Sprintf("http://%s/%s?upload",
+		p.organiserAddr, officialFilePath))
 	if err != nil {
 		return fmt.Errorf("error encountered retrieving upload server addr: %s",
 			err)
@@ -103,7 +119,8 @@ func (p *Proxy) Upload(localFilePath, officialFilePath, serverLocalFileName stri
 	splitMsg := strings.Split(string(dlServerAddrAndLf), ",")
 	dLServerAddr := splitMsg[0]
 	lF := splitMsg[1]
-	// local filename
+	// local filename, will be in the format of the global filename + version suffix.
+	// this would allow for transitioning into using diffs instead of whole files.
 
 	// make request to the upload server itself
 	var r io.Reader
@@ -124,5 +141,20 @@ func (p *Proxy) Upload(localFilePath, officialFilePath, serverLocalFileName stri
 			"when uploading: %s", err)
 	}
 
+	return nil
+}
+
+func (p *Proxy) Unlock(globalFile string) error {
+
+	resp, err := http.Get(fmt.Sprintf(`http://%s/%s?unlock`, p.lockAddr, globalFile))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	success, _ := ioutil.ReadAll(resp.Body)
+	if string(success) == "0" {
+		return fmt.Errorf("lock couldn't be released.")
+	}
 	return nil
 }

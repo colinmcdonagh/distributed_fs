@@ -8,6 +8,7 @@ import (
 	"html"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -40,13 +41,11 @@ var (
 	fileServerAddrs       []string
 	currUploadServerIndex int
 
-	filePath_serverAddr    map[string]string
-	filePath_localFileName map[string]string
+	filePath_serverAddrs map[string][]string
 )
 
 func init() {
-	filePath_serverAddr = make(map[string]string, 0)
-	filePath_localFileName = make(map[string]string, 0)
+	filePath_serverAddrs = make(map[string][]string, 0)
 }
 
 func main() {
@@ -80,10 +79,12 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 
 	if len(v) == 0 {
 		// 0. it's requesting what server to download from.
-		if serverAddr, ok := filePath_serverAddr[filePath]; ok {
+		if serverAddr, ok := filePath_serverAddrs[filePath]; ok {
+			latestVersion := len(serverAddr) - 1
 			// 0.1 file being downloaded exists.
-			response = fmt.Sprintf("%s,%s", serverAddr,
-				filePath_localFileName[filePath])
+			response = fmt.Sprintf("%s,%s", serverAddr[latestVersion],
+				fmt.Sprintf("%s%s", filePath, strconv.Itoa(latestVersion)),
+			)
 		} else {
 			// 0.2 file being downloaded doesn't exist.
 			fmt.Printf("file %s doesn't exist.\n", filePath)
@@ -92,28 +93,18 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 
 	} else if _, ok := v["upload"]; ok {
 		// 1. it's requesting what server to upload to.
+		currUploadServerIndex = (currUploadServerIndex + 1) %
+			len(fileServerAddrs)
 
-		lF := filePath
+		fPServers := filePath_serverAddrs[filePath] // make copy for convenience.
+		uploadServer := fileServerAddrs[currUploadServerIndex]
+		fPServers = append(fPServers, uploadServer)
 
-		if lFA, ok := v["local_filepath"]; ok {
-			lF = lFA[0]
-		} // local file which official file will be mapped to.
+		response = fmt.Sprintf("%s,%s",
+			uploadServer, fmt.Sprintf("%s%s", filePath, strconv.Itoa(len(fPServers)-1)),
+		)
+		filePath_serverAddrs[filePath] = fPServers // copy back over.
 
-		// first need to check if the file exists on a server already.
-		if serverAddr, ok := filePath_serverAddr[filePath]; ok {
-			// 1.1 file to be upload already exists.
-			response = fmt.Sprintf("%s,%s",
-				serverAddr,
-				filePath_localFileName[filePath])
-		} else {
-			// 1.2 file is being created for the first time.
-			currUploadServerIndex = (currUploadServerIndex + 1) %
-				len(fileServerAddrs)
-			response = fmt.Sprintf("%s,%s",
-				fileServerAddrs[currUploadServerIndex], lF)
-			filePath_serverAddr[filePath] = fileServerAddrs[currUploadServerIndex]
-			filePath_localFileName[filePath] = lF
-		}
 	} else {
 		fmt.Printf("params specified but no upload param specified\n")
 		http.Error(w, "url parameters specified but no `upload` param", 72)
