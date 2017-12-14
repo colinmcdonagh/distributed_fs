@@ -1,14 +1,14 @@
 Basic Distributed File System written in Go.
 
-Features a command line program (example/cmdline.go), which when run, supports the following
+Features a command line clients (client_side/cmd), which when run, supports the following
 commands for transparently accessing distributed file system:
-* ls
+* lock %file
+* unlock %file
 * cat %file
 * cp %local_file %remote_file
 
 TODO:
-1. caching
-2. possibly implement
-
-3. etc.
-Exporting path.
+1. caching.
+2. possibly some sort of replication.
+3. ability to version.
+4. a good README, comments, and code quality.
