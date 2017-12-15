@@ -5,18 +5,18 @@ import (
 	"os"
 	"strings"
 
-	"../../proxy"
+	"../../lib/proxy"
 )
 
 // Assumptions
 /*
  */
 
-const LOCK_ADDR = "127.0.0.1:8500"
+const LOCK_ADDR = "127.0.0.1:9104"
 
 func main() {
 
-	proxee := proxy.New("", LOCK_ADDR)
+	proxee := proxy.New("", LOCK_ADDR, "")
 	if len(os.Args) != 2 {
 		fmt.Printf("Please specify the file to take.\n")
 	}

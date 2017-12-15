@@ -64,7 +64,7 @@ func main() {
 	// therefore, can't == -1.
 
 	http.HandleFunc("/", handleQuery)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }
 
 // two types of base queries that can be made to the organiser are

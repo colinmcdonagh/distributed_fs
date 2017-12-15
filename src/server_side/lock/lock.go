@@ -31,6 +31,9 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 	if len(v) == 0 {
 		if locked, ok := lockedFiles[filePath]; ok {
 			if locked {
+				// was having some difficulty on proxy side detecting an http error
+				// when using http.Error(...), so instead just write "0" as response
+				// when failing.
 				fmt.Fprintf(w, html.EscapeString("0"))
 				return
 			}
