@@ -12,31 +12,6 @@ import (
 	"strings"
 )
 
-// Specification
-/*
- organiser needs to keep track of file server addresses,
- and what server is due to be uploaded to next.
-
- Also needs to keep track of which file path corresponds to
- which server.
-*/
-
-// Assumptions
-/*
- an assumption that will be made is that file servers won't be
- able to be added after the original addresses are specified when
- starting up the organiser.
-
- there is only one organiser.
-
- a proxy that requests to upload a file will do so, with the
- given local filename specified in the upload server address request.
-
- can only set local filename when creating the file. After that, would
- have to introduce some sort of remove file command implemented by
- the file servers.
-*/
-
 var (
 	fileServerAddrs       []string
 	currUploadServerIndex int
@@ -67,10 +42,6 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-// two types of base queries that can be made to the organiser are
-// that of downloading and uploading.
-// both make a query to the path that they are interested in.
-// uploads specify an upload parameter.
 func handleQuery(w http.ResponseWriter, r *http.Request) {
 	var response string
 	v := r.URL.Query()

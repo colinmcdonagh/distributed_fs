@@ -9,8 +9,6 @@ import (
 	"../../lib/proxy"
 )
 
-const ORG_ADDR = "127.0.0.1:8080"
-
 func main() {
 	proxee := proxy.New(config.DirSrvAddr, config.LockSrvAddr, config.CacheDir)
 	if len(os.Args) != 3 {

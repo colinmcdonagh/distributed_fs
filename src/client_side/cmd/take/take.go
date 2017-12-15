@@ -20,6 +20,6 @@ func main() {
 
 	err := proxee.Lock(takeFile)
 	if err != nil {
-		fmt.Printf("didn't achieve lock on file: %s\n", err)
+		os.Exit(1)
 	}
 }

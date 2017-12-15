@@ -1,5 +1,5 @@
 bin
 *.cache
 
-# used for testing.
-example_app/srcfiles
+# used to launch file servers from, i.e. where they'll store their `local` files.
+fs_home

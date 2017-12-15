@@ -1,7 +1,10 @@
-Basic Distributed File System written in Go.
+# Distributed File System written in Go.
 
-Interesting feature: saves versions of files, although not diffs, but whole files.
-(however, could be easily expanded).
+## Prerequisites
+* Go
+* vim
+
+## Build Steps
 
 Features a command line clients (client_side/cmd), which when run, supports the following
 commands for transparently accessing distributed file system:
@@ -23,3 +26,5 @@ Could be from copying over empty files.
 So, when doing so, please write something to the file.
 
 can't add servers, static...
+
+if build script hangs, make sure to check correct config.

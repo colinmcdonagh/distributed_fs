@@ -13,20 +13,6 @@ import (
 	"strings"
 )
 
-// Specification
-/*
- file servers don't need to know where the organiser lives.
- file servers receive requests from client proxies.
-*/
-
-// Assumptions
-/*
-
- files uploaded won't be empty files, and therefore downloaded files
- won't be empty files.
-
-*/
-
 func main() {
 	portPtr := flag.String("port", "", "port to run file server on")
 	flag.Parse()

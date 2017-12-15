@@ -1,24 +1,33 @@
 #!/bin/bash
+# script for editing files in vim.
 
-# run this script to open distributed file in vim.
+# lock file we're interested in.
+../bin/client_side/take $1
+if [ $? -ne 0 ]; then
+  # if already taken.
+  echo "file is currently being edited by another party."
+  exit 1
+fi
 
+# create a tmp directory for editing file.
 mkdir -p tmp
-# see if cat returns an error.
-# if it does, well start afresh.
+
+# get current file.
 FILE="$(../bin/client_side/cat ${1})"
+
 if [ $? -eq 0 ]; then
+  # if file exists.
   echo "${FILE}" | vim - -c ":file tmp/tempfile"
 else
+    # if file doesn't exist yet.
     vim tmp/tempfile
 fi
-
-# if file is empty, create it in order to upload empty file.
+# if file doesn't exist, i.e., vim didn't create it because it was empty.
 [ -s tmp/tempfile ] || touch tmp/tempfile
 
-../bin/client_side/cp tmp/tempfile ${1}
-if [ $? -eq 0 ]; then
-  echo OK
-else
-  echo FAIL
-fi
+# upload new version of file.
+../bin/client_side/cp tmp/tempfile $1
 rm -rf tmp
+
+# release lock on file.
+../bin/client_side/release $1
