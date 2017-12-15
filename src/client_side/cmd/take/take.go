@@ -12,7 +12,7 @@ import (
 /*
  */
 
-const LOCK_ADDR = "127.0.0.1:9104"
+const LOCK_ADDR = "127.0.0.1:8104"
 
 func main() {
 

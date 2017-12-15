@@ -50,7 +50,7 @@ func init() {
 
 func main() {
 
-	fileServerAddrsPtr := flag.String("fileServers", "", "file server addresses")
+	fileServerAddrsPtr := flag.String("fileSrvAddrs", "", "file server addresses")
 	flag.Parse()
 
 	fileServerAddrs = strings.Split(*fileServerAddrsPtr, ",")
@@ -64,7 +64,7 @@ func main() {
 	// therefore, can't == -1.
 
 	http.HandleFunc("/", handleQuery)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(":8080", nil)
 }
 
 // two types of base queries that can be made to the organiser are
