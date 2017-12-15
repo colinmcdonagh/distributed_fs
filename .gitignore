@@ -1,1 +1,5 @@
 bin
+*.cache
+
+# used for testing.
+example_app/srcfiles

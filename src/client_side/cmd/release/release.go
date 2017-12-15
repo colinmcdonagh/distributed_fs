@@ -5,18 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"../../config"
 	"../../lib/proxy"
 )
 
-// Assumptions
-/*
- */
-
-const LOCK_ADDR = "127.0.0.1:8104"
-
 func main() {
 
-	proxee := proxy.New("", LOCK_ADDR, "")
+	proxee := proxy.New(config.DirSrvAddr, config.LockSrvAddr, config.CacheDir)
 	if len(os.Args) != 2 {
 		fmt.Printf("Please specify the file to release.\n")
 	}
@@ -24,5 +19,4 @@ func main() {
 	releaseFile := strings.TrimSpace(os.Args[1])
 
 	_ = proxee.Unlock(releaseFile)
-	fmt.Println("unlocked.")
 }

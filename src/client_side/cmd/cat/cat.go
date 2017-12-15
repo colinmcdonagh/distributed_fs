@@ -2,17 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
+	"../../config"
 	"../../lib/proxy"
-
-	"os"
 )
 
-const ORG_ADDR = "127.0.0.1:8080"
-
 func main() {
-	proxee := proxy.New(ORG_ADDR, "", "cache")
+	proxee := proxy.New(config.DirSrvAddr, config.LockSrvAddr, config.CacheDir)
 
 	if len(os.Args) != 2 {
 		fmt.Println("Please enter one argument, the file to displayed.")
@@ -23,7 +21,7 @@ func main() {
 	fileContents, err := proxee.Download(file)
 	if err != nil {
 		fmt.Printf("error trying to download %s: %s\n", file, err)
-		return
+		os.Exit(1)
 	}
-	fmt.Println(fileContents)
+	fmt.Printf(fileContents)
 }

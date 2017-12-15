@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"html"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -35,7 +36,7 @@ func main() {
 }
 
 func handleQuery(w http.ResponseWriter, r *http.Request) {
-	response := ""
+	var response string
 	filePath := strings.TrimLeft(r.URL.Path, "/")
 
 	if r.Method == "GET" {
@@ -102,6 +103,9 @@ func getLocalFile(path string) (string, error) {
 	fileContents := make([]byte, 1000000)
 	numBytesRead, err := lF.Read(fileContents)
 	if err != nil {
+		if err == io.EOF {
+			return "", nil
+		}
 		return "", fmt.Errorf("encountered error when trying to read file %s: %s",
 			path, err)
 	}

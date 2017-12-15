@@ -5,18 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"../../config"
 	"../../lib/proxy"
 )
 
-// Assumptions
-/*
- */
-
-const LOCK_ADDR = "127.0.0.1:8104"
-
 func main() {
 
-	proxee := proxy.New("", LOCK_ADDR, "")
+	proxee := proxy.New(config.DirSrvAddr, config.LockSrvAddr, config.CacheDir)
 	if len(os.Args) != 2 {
 		fmt.Printf("Please specify the file to take.\n")
 	}
@@ -26,7 +21,5 @@ func main() {
 	err := proxee.Lock(takeFile)
 	if err != nil {
 		fmt.Printf("didn't achieve lock on file: %s\n", err)
-		return
 	}
-	fmt.Println("success.")
 }

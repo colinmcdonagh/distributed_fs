@@ -5,18 +5,14 @@ import (
 	"os"
 	"strings"
 
+	"../../config"
 	"../../lib/proxy"
 )
-
-// Assumptions
-/*
- */
 
 const ORG_ADDR = "127.0.0.1:8080"
 
 func main() {
-
-	proxee := proxy.New(ORG_ADDR, "", "cache")
+	proxee := proxy.New(config.DirSrvAddr, config.LockSrvAddr, config.CacheDir)
 	if len(os.Args) != 3 {
 		fmt.Printf("Please specify the file to copy and the global file identifier.\n"+
 			"Received the following arguments: %v\n", os.Args)
@@ -27,7 +23,6 @@ func main() {
 
 	err := proxee.Upload(localFile, globalFile)
 	if err != nil {
-		fmt.Printf("error trying to upload local file %s to global file %s: %s.\n",
-			localFile, globalFile, err)
+		os.Exit(1)
 	}
 }

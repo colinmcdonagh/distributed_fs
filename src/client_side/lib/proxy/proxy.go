@@ -193,19 +193,6 @@ func (p *Proxy) Upload(uploadFile, gloablFilePath string) error {
 		return fmt.Errorf("error opening local file: %s", err)
 	}
 
-	if p.cacheDir != "" {
-		// create cached file for skpping downloading in the future.
-		var c io.Writer
-		c, err = os.Create(filepath.Join(p.cacheDir, lF))
-		if err != nil {
-			return fmt.Errorf("error encountered creating cache file: %s", err)
-		}
-		_, err = io.Copy(c, u)
-		if err != nil {
-			return fmt.Errorf("error encountered copying over upload file to cache file: %s", err)
-		}
-	}
-
 	resp, err = http.Post(fmt.Sprintf("http://%s/%s",
 		dLServerAddr, lF), "text/plain", u)
 	if err != nil {
@@ -218,5 +205,18 @@ func (p *Proxy) Upload(uploadFile, gloablFilePath string) error {
 			"when uploading: %s", err)
 	}
 
+	if p.cacheDir != "" {
+		// create cached file for skpping downloading in the future.
+		var c io.Writer
+		c, err = os.Create(filepath.Join(p.cacheDir, lF))
+		if err != nil {
+			return fmt.Errorf("error encountered creating cache file: %s", err)
+		}
+		u, _ = os.Open(uploadFile)
+		_, err = io.Copy(c, u)
+		if err != nil {
+			return fmt.Errorf("error encountered copying over upload file to cache file: %s", err)
+		}
+	}
 	return nil
 }

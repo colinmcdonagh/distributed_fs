@@ -87,7 +87,6 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 			)
 		} else {
 			// 0.2 file being downloaded doesn't exist.
-			fmt.Printf("file %s doesn't exist.\n", filePath)
 			http.Error(w, fmt.Sprintf("file %s doesn't exist", filePath), 71)
 		}
 

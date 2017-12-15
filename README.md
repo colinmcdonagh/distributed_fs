@@ -17,3 +17,9 @@ TODO:
 2. a good README, comments, and code quality.
 
 allow usage of local filenames on proxy. This corresponds to using versions in practice.
+
+some times get an EOF error... can't replicate the error however.
+Could be from copying over empty files.
+So, when doing so, please write something to the file.
+
+can't add servers, static...
