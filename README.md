@@ -1,17 +1,5 @@
 # Distributed File System written in Go.
 
-Colin McDonagh - 13322897
-
-Features implemented:
-* Distributed Transparent File Access
-* Directory Service
-* Caching
-* Lock Service
-
-## Prerequisites
-* Go
-* Vim
-
 ## Build Steps
 1. Determine what ports to run the lock server and directory server on.
 For e.g. 8081 and 8084 respectively (which is the default)
@@ -69,9 +57,3 @@ Changes to the lock server address or directory server address require rebuildin
 
 If all the services are up and running, adding another file service requires restarting
 the directory service with the updated list of file servers.
-
-## Final Remarks
-
-Please contact me if any environment-centric build issues arise for you.
-
-Cheers
